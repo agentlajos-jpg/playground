@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#05070d">
+  <meta name="description" content="Valós idejű budapesti óra az Európa/Budapest időzónában, magyar nyelvű dátummal és napkelte/napnyugta adatokkal.">
+  <title>Budapesti idő · Európa/Budapest</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='38' fill='%23fbbf24'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #05070d;
+      --text: #f8fafc;
+      --soft: #cbd5e1;
+      --muted: #93a1b5;
+      --faint: #7c8aa0;
+      --gold: #fbbf24;
+      --gold-soft: #fcd34d;
+      --border: rgba(255, 255, 255, 0.09);
+      --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SF Mono", ui-monospace, "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: clamp(1rem, 4vw, 2.5rem);
+      overflow-x: hidden;
+      color: var(--text);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      background:
+        radial-gradient(60vmax 60vmax at 12% 8%, rgba(63, 94, 217, 0.20), transparent 62%),
+        radial-gradient(52vmax 52vmax at 92% 94%, rgba(245, 158, 11, 0.12), transparent 64%),
+        var(--bg);
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(ellipse 78% 66% at 50% 44%, #000 15%, transparent 74%);
+      mask-image: radial-gradient(ellipse 78% 66% at 50% 44%, #000 15%, transparent 74%);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: grid;
+      place-items: center;
+    }
+
+    .card {
+      position: relative;
+      width: min(100%, 690px);
+      padding: clamp(1.5rem, 5vw, 3.25rem) clamp(1.2rem, 5vw, 3.25rem) clamp(1.35rem, 4vw, 2.25rem);
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: clamp(22px, 4vw, 34px);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.018));
+      box-shadow:
+        0 40px 90px -32px rgba(0, 0, 0, 0.85),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+      -webkit-backdrop-filter: blur(18px) saturate(120%);
+      backdrop-filter: blur(18px) saturate(120%);
+      animation: rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 8%;
+      width: 84%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.55), transparent);
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin: 0 0 clamp(1.35rem, 4vw, 2.1rem);
+      padding: 0.42rem 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow .pulse {
+      width: 0.46rem;
+      height: 0.46rem;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55);
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5); }
+      70% { box-shadow: 0 0 0 0.42rem rgba(251, 191, 36, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+    }
+
+    .clock {
+      display: block;
+      margin: 0;
+      padding: 0;
+    }
+
+    .time {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      margin: 0 0 clamp(0.85rem, 2.4vw, 1.15rem);
+      font-size: clamp(2.9rem, 15vw, 7rem);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums lining-nums;
+      letter-spacing: -0.055em;
+      line-height: 0.95;
+      color: var(--text);
+      text-shadow: 0 0 70px rgba(148, 163, 184, 0.16);
+    }
+
+    .time .sep {
+      padding: 0 0.04em;
+      color: rgba(248, 250, 252, 0.45);
+      font-weight: 400;
+    }
+
+    .time .seconds {
+      color: var(--gold);
+      font-weight: 600;
+      text-shadow: 0 0 46px rgba(251, 191, 36, 0.32);
+    }
+
+    .ticker {
+      width: min(100%, 420px);
+      height: 2px;
+      margin: 0 auto clamp(1.15rem, 3vw, 1.6rem);
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .ticker__fill {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(251, 191, 36, 0.35), var(--gold));
+      box-shadow: 0 0 18px rgba(251, 191, 36, 0.45);
+      transition: width 1s linear;
+    }
+
+    .date {
+      margin: 0 0 clamp(0.9rem, 2.6vw, 1.25rem);
+      color: var(--soft);
+      font-size: clamp(0.95rem, 2.4vw, 1.1rem);
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+
+    .zone {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0;
+      padding: 0.4rem 0.85rem;
+      border: 1px solid rgba(251, 191, 36, 0.22);
+      border-radius: 999px;
+      background: rgba(251, 191, 36, 0.07);
+      color: var(--muted);
+      font-size: 0.73rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    .zone strong {
+      color: var(--gold-soft);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .zone .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.55;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin: clamp(1.4rem, 4vw, 2rem) 0 0;
+    }
+
+    .stat {
+      padding: clamp(0.8rem, 2vw, 1.05rem) 0.6rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .stat__label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.34rem;
+      margin: 0 0 0.42rem;
+      color: #8fa0b8;
+      font-size: 0.63rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .stat__label svg {
+      width: 14px;
+      height: 14px;
+      color: var(--gold);
+      opacity: 0.85;
+      flex: none;
+    }
+
+    .stat__value {
+      margin: 0;
+      color: #eef2f7;
+      font-size: clamp(1rem, 3vw, 1.18rem);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+    }
+
+    .meta {
+      margin: clamp(1.4rem, 4vw, 2rem) 0 0;
+      padding-top: clamp(1rem, 2.6vw, 1.35rem);
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      color: var(--faint);
+      font-size: 0.73rem;
+      line-height: 1.65;
+    }
+
+    .meta p {
+      margin: 0;
+    }
+
+    .meta strong {
+      color: #c3cede;
+      font-weight: 600;
+    }
+
+    .meta .system {
+      margin-top: 0.15rem;
+    }
+
+    .meta time {
+      color: #c3cede;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 560px) {
+      .stats {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .stat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.72rem 0.95rem;
+        text-align: left;
+      }
+
+      .stat__label {
+        justify-content: flex-start;
+        margin: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <main>
+    <section class="card" aria-labelledby="page-title">
+      <h1 id="page-title" class="sr-only">Budapesti időzónás óra</h1>
+
+      <p class="eyebrow">
+        <span class="pulse" aria-hidden="true"></span>
+        Élő idő · Európa/Budapest
+      </p>
+
+      <div class="clock">
+        <time class="time" id="clock" datetime="">
+          <span id="hours">00</span><span class="sep" aria-hidden="true">:</span><span id="minutes">00</span><span class="sep" aria-hidden="true">:</span><span class="seconds" id="seconds">00</span>
+        </time>
+        <div class="ticker" aria-hidden="true"><span class="ticker__fill" id="ticker-fill"></span></div>
+        <p class="date" id="date">—</p>
+        <p class="zone" id="zone">
+          <strong id="zone-abbr">CET</strong>
+          <span class="dot" aria-hidden="true"></span>
+          <span id="zone-name">téli időszámítás</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span id="zone-offset">UTC+1</span>
+        </p>
+      </div>
+
+      <div class="stats" role="group" aria-label="Napkelte és napnyugta">
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2v8"/><path d="m8 6 4-4 4 4"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/>
+            </svg>
+            Napkelte
+          </p>
+          <p class="stat__value"><time id="sunrise">—</time></p>
+        </div>
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 10V2"/><path d="m16 6-4 4-4-4"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/>
+            </svg>
+            Napnyugta
+          </p>
+          <p class="stat__value"><time id="sunset">—</time></p>
+        </div>
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+            Nappal hossza
+          </p>
+          <p class="stat__value" id="daylength">—</p>
+        </div>
+      </div>
+
+      <footer class="meta">
+        <p>Az óra a készüléked rendszeridejéből számol, az <strong>Európa/Budapest</strong> időzónára formázva.</p>
+        <p class="system">Rendszeridő: <time id="system-time">—</time> · <span id="system-zone">—</span></p>
+      </footer>
+
+      <noscript>
+        <p style="color:#fcd34d;font-size:0.85rem;margin:1rem 0 0;">Az óra megjelenítéséhez engedélyezd a JavaScriptet.</p>
+      </noscript>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const TIME_ZONE = 'Europe/Budapest';
+      const LATITUDE = 47.4979;
+      const LONGITUDE = 19.0402;
+      const RAD = Math.PI / 180;
+      const DAY_MS = 86400000;
+      const J1970 = 2440588;
+      const J2000 = 2451545;
+      const OBLIQUITY = RAD * 23.4397;
+
+      const pad2 = (value) => String(value).padStart(2, '0');
+
+      const utcParts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: TIME_ZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+      });
+
+      const clockParts = new Intl.DateTimeFormat('hu-HU', {
+        timeZone: TIME_ZONE,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+      });
+
+      const localClock = new Intl.DateTimeFormat('hu-HU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+      });
+
+      const hungarianDate = new Intl.DateTimeFormat('hu-HU', {
+        timeZone: TIME_ZONE,
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long'
+      });
+
+      const zoneLabel = new Intl.DateTimeFormat('en-GB', {
+        timeZone: TIME_ZONE,
+        timeZoneName: 'short'
+      });
+
+      const sunClock = new Intl.DateTimeFormat('hu-HU', {
+        timeZone: TIME_ZONE,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      });
+
+      const $ = (id) => document.getElementById(id);
+
+      const els = {
+        clock: $('clock'),
+        hours: $('hours'),
+        minutes: $('minutes'),
+        seconds: $('seconds'),
+        ticker: $('ticker-fill'),
+        date: $('date'),
+        zoneAbbr: $('zone-abbr'),
+        zoneName: $('zone-name'),
+        zoneOffset: $('zone-offset'),
+        sunrise: $('sunrise'),
+        sunset: $('sunset'),
+        daylength: $('daylength'),
+        systemTime: $('system-time'),
+        systemZone: $('system-zone')
+      };
+
+      function partsMap(formatter, date) {
+        const map = {};
+        for (const part of formatter.formatToParts(date)) {
+          if (part.type !== 'literal') {
+            map[part.type] = part.value;
+          }
+        }
+        return map;
+      }
+
+      function timeZoneOffsetMinutes(date) {
+        const parts = partsMap(utcParts, date);
+        const asUtc = Date.UTC(
+          Number(parts.year),
+          Number(parts.month) - 1,
+          Number(parts.day),
+          Number(parts.hour),
+          Number(parts.minute),
+          Number(parts.second)
+        );
+        return Math.round((asUtc - date.getTime()) / 60000);
+      }
+
+      function offsetLabel(minutes) {
+        const sign = minutes >= 0 ? '+' : '−';
+        const absolute = Math.abs(minutes);
+        const hours = Math.floor(absolute / 60);
+        const rest = absolute % 60;
+        return 'UTC' + sign + hours + (rest ? ':' + pad2(rest) : '');
+      }
+
+      function budapestDayKey(date) {
+        const parts = partsMap(utcParts, date);
+        return parts.year + parts.month + parts.day;
+      }
+
+      // SunCalc-style solar position: standard 0.833° horizon refraction.
+      const toJulian = (date) => date.valueOf() / DAY_MS - 0.5 + J1970;
+      const fromJulian = (julian) => new Date((julian + 0.5 - J1970) * DAY_MS);
+      const toDays = (date) => toJulian(date) - J2000;
+      const solarMeanAnomaly = (days) => RAD * (357.5291 + 0.98560028 * days);
+      const eclipticLongitude = (meanAnomaly) => {
+        const center = RAD * (1.9148 * Math.sin(meanAnomaly) + 0.02 * Math.sin(2 * meanAnomaly) + 0.0003 * Math.sin(3 * meanAnomaly));
+        return meanAnomaly + center + RAD * 102.9372 + Math.PI;
+      };
+      const declination = (eclipticLon, eclipticLat) =>
+        Math.asin(Math.sin(eclipticLat) * Math.cos(OBLIQUITY) + Math.cos(eclipticLat) * Math.sin(OBLIQUITY) * Math.sin(eclipticLon));
+
+      function sunTimes(date) {
+        const lw = RAD * -LONGITUDE;
+        const phi = RAD * LATITUDE;
+        const days = toDays(date);
+        const n = Math.round(days - 0.0009 - lw / (2 * Math.PI));
+        const ds = 0.0009 + lw / (2 * Math.PI) + n;
+        const meanAnomaly = solarMeanAnomaly(ds);
+        const eclipticLon = eclipticLongitude(meanAnomaly);
+        const dec = declination(eclipticLon, 0);
+        const solarNoon = J2000 + ds + 0.0053 * Math.sin(meanAnomaly) - 0.0069 * Math.sin(2 * eclipticLon);
+
+        const cosHourAngle = (Math.sin(RAD * -0.833) - Math.sin(phi) * Math.sin(dec)) /
+          (Math.cos(phi) * Math.cos(dec));
+
+        if (cosHourAngle > 1 || cosHourAngle < -1) {
+          return { sunrise: null, sunset: null };
+        }
+
+        const hourAngle = Math.acos(cosHourAngle);
+        const setJulian = J2000 + (0.0009 + (hourAngle + lw) / (2 * Math.PI) + n) +
+          0.0053 * Math.sin(meanAnomaly) - 0.0069 * Math.sin(2 * eclipticLon);
+        const riseJulian = solarNoon - (setJulian - solarNoon);
+
+        return {
+          sunrise: fromJulian(riseJulian),
+          sunset: fromJulian(setJulian)
+        };
+      }
+
+      function formatDuration(milliseconds) {
+        const totalMinutes = Math.round(milliseconds / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return hours + ' óra ' + pad2(minutes) + ' perc';
+      }
+
+      let lastDayKey = null;
+      let sun = { sunrise: null, sunset: null };
+
+      function updateSun(date, dayKey) {
+        if (dayKey === lastDayKey) {
+          return;
+        }
+        lastDayKey = dayKey;
+
+        const parts = partsMap(utcParts, date);
+        const noon = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), 12));
+        sun = sunTimes(noon);
+
+        els.sunrise.textContent = sun.sunrise ? sunClock.format(sun.sunrise) : '—';
+        els.sunset.textContent = sun.sunset ? sunClock.format(sun.sunset) : '—';
+        els.daylength.textContent = sun.sunrise && sun.sunset
+          ? formatDuration(sun.sunset - sun.sunrise)
+          : '—';
+
+        if (sun.sunrise) {
+          els.sunrise.setAttribute('datetime', sun.sunrise.toISOString());
+        }
+        if (sun.sunset) {
+          els.sunset.setAttribute('datetime', sun.sunset.toISOString());
+        }
+      }
+
+      function render(date) {
+        const parts = partsMap(clockParts, date);
+        const hours = parts.hour;
+        const minutes = parts.minute;
+        const seconds = parts.second;
+
+        els.hours.textContent = hours;
+        els.minutes.textContent = minutes;
+        els.seconds.textContent = seconds;
+        els.clock.setAttribute('datetime', date.toISOString());
+        els.clock.setAttribute('aria-label', 'Budapesti idő: ' +
+          Number(hours) + ' óra ' + Number(minutes) + ' perc ' + Number(seconds) + ' másodperc');
+
+        const secondsProgress = Math.min(1, (Number(seconds) + 1) / 60);
+        if (Number(seconds) === 0) {
+          // Avoid animating the ticker backwards at the start of a new minute.
+          els.ticker.style.transitionDuration = '0s';
+          els.ticker.style.width = '0%';
+          void els.ticker.offsetWidth;
+          els.ticker.style.transitionDuration = '';
+          els.ticker.style.width = (100 / 60).toFixed(3) + '%';
+        } else {
+          els.ticker.style.width = (secondsProgress * 100).toFixed(3) + '%';
+        }
+
+        els.date.textContent = hungarianDate.format(date);
+
+        const offset = timeZoneOffsetMinutes(date);
+        const abbreviation = partsMap(zoneLabel, date).timeZoneName || 'CET';
+        els.zoneAbbr.textContent = abbreviation;
+        els.zoneName.textContent = offset === 120 ? 'nyári időszámítás' : 'téli időszámítás';
+        els.zoneOffset.textContent = offsetLabel(offset);
+
+        const local = partsMap(localClock, date);
+        els.systemTime.textContent = pad2(local.hour) + ':' + pad2(local.minute) + ':' + pad2(local.second);
+        els.systemTime.setAttribute('datetime', date.toISOString());
+        els.systemZone.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'helyi időzóna';
+
+        updateSun(date, budapestDayKey(date));
+      }
+
+      function scheduleTick() {
+        const now = Date.now();
+        const delay = 1000 - (now % 1000) + 15;
+        window.setTimeout(() => {
+          render(new Date());
+          scheduleTick();
+        }, delay);
+      }
+
+      render(new Date());
+      scheduleTick();
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          render(new Date());
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
