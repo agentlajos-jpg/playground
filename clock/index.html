@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#05070d">
-  <meta name="description" content="Valós idejű budapesti óra az Európa/Budapest időzónában, magyar nyelvű dátummal, napkelte/napnyugta adatokkal és sötét/világos témával.">
+  <meta name="description" content="Valós idejű budapesti analóg óra az Európa/Budapest időzónában, magyar nyelvű dátummal, napkelte/napnyugta adatokkal és sötét/világos témával.">
   <title>Budapesti idő · Európa/Budapest</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='38' fill='%23fbbf24'/%3E%3C/svg%3E">
   <script>
@@ -50,19 +50,24 @@
       --card-bottom: rgba(255, 255, 255, 0.018);
       --card-shadow: 0 40px 90px -32px rgba(0, 0, 0, 0.85);
       --card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-      --surface: rgba(255, 255, 255, 0.03);
       --eyebrow-bg: rgba(255, 255, 255, 0.03);
       --eyebrow-border: rgba(255, 255, 255, 0.10);
       --button-bg: rgba(255, 255, 255, 0.04);
       --button-border: rgba(255, 255, 255, 0.12);
       --button-hover: rgba(255, 255, 255, 0.09);
       --button-icon: #f8fafc;
-      --sep: rgba(248, 250, 252, 0.45);
-      --time-shadow: 0 0 70px rgba(148, 163, 184, 0.16);
-      --seconds-shadow: 0 0 46px rgba(var(--gold-rgb), 0.32);
-      --ticker-track: rgba(255, 255, 255, 0.07);
-      --ticker-start: rgba(var(--gold-rgb), 0.35);
-      --ticker-glow: 0 0 18px rgba(var(--gold-rgb), 0.45);
+      --dial-bg: radial-gradient(circle at 50% 33%, #141b2b 0%, #0a0f18 58%, #060911 100%);
+      --dial-face: #0a0f18;
+      --dial-border: rgba(255, 255, 255, 0.10);
+      --dial-highlight: rgba(255, 255, 255, 0.06);
+      --dial-shadow: 0 34px 70px -30px rgba(0, 0, 0, 0.9);
+      --dial-tick: rgba(255, 255, 255, 0.22);
+      --dial-tick-hour: rgba(255, 255, 255, 0.55);
+      --dial-number: #a9b6c8;
+      --dial-hand: #f8fafc;
+      --dial-second: var(--gold);
+      --dial-pin: var(--gold);
+      --dial-pin-inner: #0a0f18;
       --zone-border: rgba(var(--gold-rgb), 0.22);
       --zone-bg: rgba(var(--gold-rgb), 0.07);
       --stat-label: #8fa0b8;
@@ -93,19 +98,24 @@
       --card-bottom: rgba(255, 255, 255, 0.58);
       --card-shadow: 0 40px 90px -36px rgba(15, 23, 42, 0.32);
       --card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.9);
-      --surface: rgba(15, 23, 42, 0.035);
       --eyebrow-bg: rgba(255, 255, 255, 0.55);
       --eyebrow-border: rgba(15, 23, 42, 0.10);
       --button-bg: rgba(255, 255, 255, 0.65);
       --button-border: rgba(15, 23, 42, 0.12);
       --button-hover: rgba(15, 23, 42, 0.06);
       --button-icon: #334155;
-      --sep: rgba(15, 23, 42, 0.40);
-      --time-shadow: 0 0 70px rgba(148, 163, 184, 0.10);
-      --seconds-shadow: 0 0 46px rgba(var(--gold-rgb), 0.18);
-      --ticker-track: rgba(15, 23, 42, 0.10);
-      --ticker-start: rgba(var(--gold-rgb), 0.30);
-      --ticker-glow: 0 0 18px rgba(var(--gold-rgb), 0.20);
+      --dial-bg: radial-gradient(circle at 50% 32%, #ffffff 0%, #fbf8f2 58%, #f2ede3 100%);
+      --dial-face: #fbf8f2;
+      --dial-border: rgba(15, 23, 42, 0.10);
+      --dial-highlight: rgba(255, 255, 255, 0.9);
+      --dial-shadow: 0 34px 70px -34px rgba(15, 23, 42, 0.28);
+      --dial-tick: rgba(15, 23, 42, 0.18);
+      --dial-tick-hour: rgba(15, 23, 42, 0.5);
+      --dial-number: #475569;
+      --dial-hand: #0f172a;
+      --dial-second: var(--gold);
+      --dial-pin: var(--gold);
+      --dial-pin-inner: #fbf8f2;
       --zone-border: rgba(var(--gold-rgb), 0.28);
       --zone-bg: rgba(var(--gold-rgb), 0.08);
       --stat-label: #5b6b82;
@@ -167,7 +177,7 @@
     .card {
       position: relative;
       width: min(100%, 690px);
-      padding: clamp(1.5rem, 5vw, 3.25rem) clamp(1.2rem, 5vw, 3.25rem) clamp(1.35rem, 4vw, 2.25rem);
+      padding: clamp(1.4rem, 4.5vw, 2.8rem) clamp(1.2rem, 5vw, 3.25rem) clamp(1.3rem, 4vw, 2rem);
       text-align: center;
       border: 1px solid var(--border);
       border-radius: clamp(22px, 4vw, 34px);
@@ -207,7 +217,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.55rem;
-      margin: 0 0 clamp(1.35rem, 4vw, 2.1rem);
+      margin: 0 0 clamp(1.25rem, 3.5vw, 1.9rem);
     }
 
     .eyebrow {
@@ -298,53 +308,75 @@
       padding: 0;
     }
 
-    .time {
-      display: flex;
-      align-items: baseline;
-      justify-content: center;
-      margin: 0 0 clamp(0.85rem, 2.4vw, 1.15rem);
-      font-size: clamp(2.9rem, 15vw, 7rem);
-      font-weight: 500;
-      font-variant-numeric: tabular-nums lining-nums;
-      letter-spacing: -0.055em;
-      line-height: 0.95;
-      color: var(--text);
-      text-shadow: var(--time-shadow);
-    }
-
-    .time .sep {
-      padding: 0 0.04em;
-      color: var(--sep);
-      font-weight: 400;
-    }
-
-    .time .seconds {
-      color: var(--gold);
-      font-weight: 600;
-      text-shadow: var(--seconds-shadow);
-    }
-
-    .ticker {
-      width: min(100%, 420px);
-      height: 2px;
-      margin: 0 auto clamp(1.15rem, 3vw, 1.6rem);
-      overflow: hidden;
-      border-radius: 999px;
-      background: var(--ticker-track);
-    }
-
-    .ticker__fill {
+    .analog {
       display: block;
-      width: 0;
+      width: min(100%, 330px);
+      aspect-ratio: 1;
+      margin: 0 auto clamp(1.15rem, 3vw, 1.5rem);
+      border: 1px solid var(--dial-border);
+      border-radius: 50%;
+      background: var(--dial-bg);
+      box-shadow:
+        var(--dial-shadow),
+        inset 0 1px 0 var(--dial-highlight);
+    }
+
+    .analog__dial {
+      display: block;
+      width: 100%;
       height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--ticker-start), var(--gold));
-      box-shadow: var(--ticker-glow);
-      transition: width 1s linear;
+    }
+
+    .dial-tick {
+      stroke: var(--dial-tick);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+    }
+
+    .dial-tick--hour {
+      stroke: var(--dial-tick-hour);
+      stroke-width: 3.2;
+    }
+
+    .dial-number {
+      fill: var(--dial-number);
+      font-family: var(--font-sans);
+      font-size: 21px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .hand {
+      stroke-linecap: round;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.22));
+    }
+
+    .hand--hour {
+      stroke: var(--dial-hand);
+      stroke-width: 7.5;
+    }
+
+    .hand--minute {
+      stroke: var(--dial-hand);
+      stroke-width: 4.5;
+    }
+
+    .hand--second {
+      stroke: var(--dial-second);
+      stroke-width: 2;
+      filter: none;
+    }
+
+    .analog__pin {
+      fill: var(--dial-pin);
+    }
+
+    .analog__pin-inner {
+      fill: var(--dial-pin-inner);
     }
 
     .date {
-      margin: 0 0 clamp(0.9rem, 2.6vw, 1.25rem);
+      margin: 0 0 clamp(0.85rem, 2.4vw, 1.15rem);
       color: var(--soft);
       font-size: clamp(0.95rem, 2.4vw, 1.1rem);
       font-weight: 400;
@@ -386,7 +418,7 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.75rem;
-      margin: clamp(1.4rem, 4vw, 2rem) 0 0;
+      margin: clamp(1.25rem, 3.5vw, 1.75rem) 0 0;
     }
 
     .stat {
@@ -427,8 +459,8 @@
     }
 
     .meta {
-      margin: clamp(1.4rem, 4vw, 2rem) 0 0;
-      padding-top: clamp(1rem, 2.6vw, 1.35rem);
+      margin: clamp(1.25rem, 3.5vw, 1.75rem) 0 0;
+      padding-top: clamp(0.9rem, 2.4vw, 1.25rem);
       border-top: 1px solid var(--meta-border);
       color: var(--faint);
       font-size: 0.73rem;
@@ -448,10 +480,9 @@
       margin-top: 0.15rem;
     }
 
-    .meta time {
+    .meta span {
       color: var(--strong-text);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.04em;
+      font-weight: 500;
     }
 
     .sr-only {
@@ -468,6 +499,10 @@
     }
 
     @media (max-width: 560px) {
+      .analog {
+        width: min(100%, 300px);
+      }
+
       .stats {
         grid-template-columns: 1fr;
         gap: 0.5rem;
@@ -528,10 +563,17 @@
       </div>
 
       <div class="clock">
-        <time class="time" id="clock" datetime="">
-          <span id="hours">00</span><span class="sep" aria-hidden="true">:</span><span id="minutes">00</span><span class="sep" aria-hidden="true">:</span><span class="seconds" id="seconds">00</span>
+        <time class="analog" id="clock" datetime="" role="img" aria-label="Budapesti analóg óra">
+          <svg class="analog__dial" viewBox="0 0 400 400" aria-hidden="true" focusable="false">
+            <g id="dial-ticks"></g>
+            <g id="dial-numbers"></g>
+            <line class="hand hand--hour" id="hand-hour" x1="200" y1="208" x2="200" y2="110"/>
+            <line class="hand hand--minute" id="hand-minute" x1="200" y1="214" x2="200" y2="64"/>
+            <line class="hand hand--second" id="hand-second" x1="200" y1="228" x2="200" y2="52"/>
+            <circle class="analog__pin" cx="200" cy="200" r="8"/>
+            <circle class="analog__pin-inner" cx="200" cy="200" r="3.2"/>
+          </svg>
         </time>
-        <div class="ticker" aria-hidden="true"><span class="ticker__fill" id="ticker-fill"></span></div>
         <p class="date" id="date">—</p>
         <p class="zone" id="zone">
           <strong id="zone-abbr">CET</strong>
@@ -574,7 +616,7 @@
 
       <footer class="meta">
         <p>Az óra a készüléked rendszeridejéből számol, az <strong>Európa/Budapest</strong> időzónára formázva.</p>
-        <p class="system">Rendszeridő: <time id="system-time">—</time> · <span id="system-zone">—</span></p>
+        <p class="system">A készüléked időzónája: <span id="system-zone">—</span></p>
       </footer>
 
       <noscript>
@@ -597,6 +639,7 @@
       const OBLIQUITY = RAD * 23.4397;
       const THEME_KEY = 'budapest-clock-theme';
       const THEME_COLORS = { dark: '#05070d', light: '#f4f1ea' };
+      const SVG_NS = 'http://www.w3.org/2000/svg';
 
       const pad2 = (value) => String(value).padStart(2, '0');
 
@@ -613,13 +656,6 @@
 
       const clockParts = new Intl.DateTimeFormat('hu-HU', {
         timeZone: TIME_ZONE,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hourCycle: 'h23'
-      });
-
-      const localClock = new Intl.DateTimeFormat('hu-HU', {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
@@ -650,10 +686,6 @@
 
       const els = {
         clock: $('clock'),
-        hours: $('hours'),
-        minutes: $('minutes'),
-        seconds: $('seconds'),
-        ticker: $('ticker-fill'),
         date: $('date'),
         zoneAbbr: $('zone-abbr'),
         zoneName: $('zone-name'),
@@ -661,9 +693,11 @@
         sunrise: $('sunrise'),
         sunset: $('sunset'),
         daylength: $('daylength'),
-        systemTime: $('system-time'),
         systemZone: $('system-zone'),
-        themeToggle: $('theme-toggle')
+        themeToggle: $('theme-toggle'),
+        hourHand: $('hand-hour'),
+        minuteHand: $('hand-minute'),
+        secondHand: $('hand-second')
       };
 
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
@@ -715,6 +749,35 @@
         lightScheme.addEventListener('change', handleSystemThemeChange);
       } else if (typeof lightScheme.addListener === 'function') {
         lightScheme.addListener(handleSystemThemeChange);
+      }
+
+      function buildDial() {
+        const tickGroup = $('dial-ticks');
+        const numberGroup = $('dial-numbers');
+
+        for (let index = 0; index < 60; index += 1) {
+          const isHour = index % 5 === 0;
+          const tick = document.createElementNS(SVG_NS, 'line');
+          tick.setAttribute('x1', '200');
+          tick.setAttribute('y1', isHour ? '14' : '17');
+          tick.setAttribute('x2', '200');
+          tick.setAttribute('y2', isHour ? '28' : '23');
+          tick.setAttribute('transform', 'rotate(' + (index * 6) + ' 200 200)');
+          tick.setAttribute('class', isHour ? 'dial-tick dial-tick--hour' : 'dial-tick');
+          tickGroup.appendChild(tick);
+        }
+
+        for (let number = 1; number <= 12; number += 1) {
+          const angle = (number * 30 - 90) * RAD;
+          const label = document.createElementNS(SVG_NS, 'text');
+          label.setAttribute('x', (200 + Math.cos(angle) * 148).toFixed(2));
+          label.setAttribute('y', (200 + Math.sin(angle) * 148).toFixed(2));
+          label.setAttribute('text-anchor', 'middle');
+          label.setAttribute('dominant-baseline', 'central');
+          label.setAttribute('class', 'dial-number');
+          label.textContent = String(number);
+          numberGroup.appendChild(label);
+        }
       }
 
       function partsMap(formatter, date) {
@@ -828,31 +891,23 @@
         }
       }
 
+      function rotateHand(hand, angle) {
+        hand.setAttribute('transform', 'rotate(' + angle.toFixed(3) + ' 200 200)');
+      }
+
       function render(date) {
         const parts = partsMap(clockParts, date);
-        const hours = parts.hour;
-        const minutes = parts.minute;
-        const seconds = parts.second;
+        const hours = Number(parts.hour);
+        const minutes = Number(parts.minute);
+        const seconds = Number(parts.second);
 
-        els.hours.textContent = hours;
-        els.minutes.textContent = minutes;
-        els.seconds.textContent = seconds;
+        rotateHand(els.hourHand, ((hours % 12) + minutes / 60 + seconds / 3600) * 30);
+        rotateHand(els.minuteHand, (minutes + seconds / 60) * 6);
+        rotateHand(els.secondHand, seconds * 6);
+
         els.clock.setAttribute('datetime', date.toISOString());
         els.clock.setAttribute('aria-label', 'Budapesti idő: ' +
-          Number(hours) + ' óra ' + Number(minutes) + ' perc ' + Number(seconds) + ' másodperc');
-
-        const secondsProgress = Math.min(1, (Number(seconds) + 1) / 60);
-        if (Number(seconds) === 0) {
-          // Avoid animating the ticker backwards at the start of a new minute.
-          els.ticker.style.transitionDuration = '0s';
-          els.ticker.style.width = '0%';
-          void els.ticker.offsetWidth;
-          els.ticker.style.transitionDuration = '';
-          els.ticker.style.width = (100 / 60).toFixed(3) + '%';
-        } else {
-          els.ticker.style.width = (secondsProgress * 100).toFixed(3) + '%';
-        }
-
+          hours + ' óra ' + minutes + ' perc ' + seconds + ' másodperc');
         els.date.textContent = hungarianDate.format(date);
 
         const offset = timeZoneOffsetMinutes(date);
@@ -861,9 +916,6 @@
         els.zoneName.textContent = offset === 120 ? 'nyári időszámítás' : 'téli időszámítás';
         els.zoneOffset.textContent = offsetLabel(offset);
 
-        const local = partsMap(localClock, date);
-        els.systemTime.textContent = pad2(local.hour) + ':' + pad2(local.minute) + ':' + pad2(local.second);
-        els.systemTime.setAttribute('datetime', date.toISOString());
         els.systemZone.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'helyi időzóna';
 
         updateSun(date, budapestDayKey(date));
@@ -878,6 +930,7 @@
         }, delay);
       }
 
+      buildDial();
       render(new Date());
       scheduleTick();
 
